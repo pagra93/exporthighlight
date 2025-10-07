@@ -1,0 +1,23 @@
+# Coolify Configuration
+# This tells Coolify this is a Node.js application, not a static site
+
+# Application Type
+TYPE=nodejs
+
+# Build Configuration
+BUILD_COMMAND=npm run build
+START_COMMAND=npm start
+
+# Port Configuration
+PORT=3000
+
+# Environment
+NODE_ENV=production
+
+# Required Environment Variables
+# Make sure these are set in Coolify:
+# NEXT_PUBLIC_SUPABASE_URL
+# NEXT_PUBLIC_SUPABASE_ANON_KEY
+# SUPABASE_SERVICE_ROLE_KEY
+# NEXTAUTH_URL
+# NEXTAUTH_SECRET

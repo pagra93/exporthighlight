@@ -1,0 +1,24 @@
+User-agent: *
+Allow: /
+
+# Páginas públicas - permitir indexación
+Allow: /como-funciona
+Allow: /privacidad
+Allow: /terminos
+
+# Páginas privadas - bloquear indexación
+Disallow: /account/
+Disallow: /api/
+Disallow: /auth/
+Disallow: /process
+
+# Archivos específicos
+Disallow: /*.json$
+Disallow: /_next/
+Disallow: /static/
+
+# Sitemap
+Sitemap: https://exporthighlight.com/sitemap.xml
+
+# Crawl-delay para ser respetuosos
+Crawl-delay: 1

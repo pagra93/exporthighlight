@@ -1,0 +1,30 @@
+# Coolify Configuration File
+# This file tells Coolify how to deploy this application
+
+# Application Configuration
+APP_NAME=exporthighlight
+APP_TYPE=nodejs
+APP_PORT=3000
+
+# Build Configuration
+BUILD_COMMAND=npm run build
+START_COMMAND=npm start
+
+# Environment
+NODE_ENV=production
+
+# Health Check
+HEALTH_CHECK_PATH=/api/health
+HEALTH_CHECK_TIMEOUT=30
+
+# Resource Limits
+MEMORY_LIMIT=512M
+CPU_LIMIT=0.5
+
+# Required Environment Variables
+# These must be set in Coolify's environment variables section:
+# NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+# NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+# SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+# NEXTAUTH_URL=https://your-domain.com
+# NEXTAUTH_SECRET=your-secret-key

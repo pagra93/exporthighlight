@@ -1,0 +1,39 @@
+# Coolify ignore file
+# This prevents Coolify from treating these as static files
+
+# Build artifacts
+.next/
+node_modules/
+.git/
+
+# Environment files
+.env
+.env.local
+.env.production.local
+.env.development.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test files
+tests/
+*.test.js
+*.spec.js
