@@ -158,7 +158,7 @@ export function ExportLimitModal({ isOpen, onClose, onRegister, trigger }: Expor
                   </Button>
 
                   <p className="text-xs text-muted-foreground text-center mt-4">
-                    Registro en 30 segundos con email o Google
+                    Registro en 30 segundos con email
                   </p>
                 </>
               )}
