@@ -6,7 +6,17 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabaseClient';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Mail, Loader2, X } from 'lucide-react';
+import { 
+  Mail, 
+  Loader2, 
+  X, 
+  Lock, 
+  UserPlus, 
+  KeyRound, 
+  RotateCcw,
+  Eye,
+  EyeOff
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface AuthModalProps {
@@ -21,7 +31,8 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
-  const [mode, setMode] = useState<'login' | 'signup' | 'magic-link' | 'forgot-password'>('login'); // Por defecto login
+  const [mode, setMode] = useState<'login' | 'signup' | 'magic-link' | 'forgot-password'>('login');
+  const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
   const { t } = useLanguage();
 
@@ -37,16 +48,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
       return;
     }
 
-    if (mode === 'login' && !password) {
-      toast({
-        title: t.common?.error || 'Error',
-        description: t.auth?.passwordRequired || 'Please enter your password',
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (mode === 'signup' && !password) {
+    if ((mode === 'login' || mode === 'signup') && !password) {
       toast({
         title: t.common?.error || 'Error',
         description: t.auth?.passwordRequired || 'Please enter your password',
@@ -152,241 +154,326 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
     }
   };
 
-
   if (!isOpen) return null;
+
+  const authModes = [
+    { 
+      key: 'login' as const, 
+      label: t.auth?.login || 'Iniciar sesión', 
+      icon: Lock,
+      description: 'Accede con tu cuenta'
+    },
+    { 
+      key: 'signup' as const, 
+      label: t.auth?.signup || 'Crear cuenta', 
+      icon: UserPlus,
+      description: 'Nueva cuenta'
+    },
+    { 
+      key: 'magic-link' as const, 
+      label: t.auth?.magicLink || 'Magic Link', 
+      icon: Mail,
+      description: 'Sin contraseña'
+    },
+    { 
+      key: 'forgot-password' as const, 
+      label: t.auth?.forgotPassword || 'Recuperar', 
+      icon: RotateCcw,
+      description: 'Restablecer'
+    }
+  ];
 
   return (
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-[9999]">
-          {/* Backdrop - Fondo difuminado oscuro que cubre TODO */}
+          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-black/80 backdrop-blur-md"
-            style={{ backdropFilter: 'blur(8px)' }}
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
           />
 
-          {/* Modal Container - Centrado perfectamente */}
+          {/* Modal Container */}
           <div className="absolute inset-0 flex items-center justify-center p-4 overflow-y-auto">
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="bg-background rounded-2xl shadow-2xl max-w-md w-full p-8 relative my-8"
+              className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl max-w-md w-full relative my-8 overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Close button - Mejorado */}
-              <button
-                onClick={onClose}
-                aria-label="Close"
-                className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-all"
-              >
-                <X className="h-5 w-5" />
-              </button>
+              {/* Header with gradient */}
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-8 text-white relative">
+                <button
+                  onClick={onClose}
+                  aria-label="Close"
+                  className="absolute top-6 right-6 p-2 rounded-full hover:bg-white/20 transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
 
-              {!magicLinkSent ? (
-                <>
-                  <div className="text-center mb-6">
-                    <h2 className="text-3xl font-bold mb-2">
-                      {mode === 'signup' 
-                        ? (t.auth?.signupTitle || 'Crear cuenta')
-                        : mode === 'forgot-password'
-                        ? (t.auth?.forgotPasswordTitle || 'Recuperar contraseña')
-                        : (t.auth?.title || 'Iniciar sesión')
-                      }
-                    </h2>
-                    <p className="text-muted-foreground">
-                      {mode === 'signup' 
-                        ? (t.auth?.signupSubtitle || 'Crea tu cuenta para guardar y exportar todos tus highlights')
-                        : mode === 'forgot-password'
-                        ? (t.auth?.forgotPasswordSubtitle || 'Te enviaremos un enlace para restablecer tu contraseña')
-                        : (t.auth?.subtitle || 'Accede a tu cuenta para exportar todos tus highlights')
-                      }
-                    </p>
-                  </div>
+                <div className="text-center">
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.1 }}
+                    className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                  >
+                    {mode === 'signup' ? (
+                      <UserPlus className="h-8 w-8" />
+                    ) : mode === 'forgot-password' ? (
+                      <RotateCcw className="h-8 w-8" />
+                    ) : mode === 'magic-link' ? (
+                      <Mail className="h-8 w-8" />
+                    ) : (
+                      <Lock className="h-8 w-8" />
+                    )}
+                  </motion.div>
+                  
+                  <motion.h2
+                    initial={{ y: 10, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="text-2xl font-bold mb-2"
+                  >
+                    {mode === 'signup' 
+                      ? (t.auth?.signupTitle || 'Crear cuenta')
+                      : mode === 'forgot-password'
+                      ? (t.auth?.forgotPasswordTitle || 'Recuperar contraseña')
+                      : (t.auth?.title || 'Iniciar sesión')
+                    }
+                  </motion.h2>
+                  
+                  <motion.p
+                    initial={{ y: 10, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                    className="text-blue-100 text-sm"
+                  >
+                    {mode === 'signup' 
+                      ? (t.auth?.signupSubtitle || 'Crea tu cuenta para guardar y exportar todos tus highlights')
+                      : mode === 'forgot-password'
+                      ? (t.auth?.forgotPasswordSubtitle || 'Te enviaremos un enlace para restablecer tu contraseña')
+                      : (t.auth?.subtitle || 'Accede a tu cuenta para exportar todos tus highlights')
+                    }
+                  </motion.p>
+                </div>
+              </div>
 
-
-                  {/* Mode Selector - Mejorado */}
-                  <div className="grid grid-cols-2 gap-2 p-1 bg-muted/50 rounded-xl mb-6">
-                    <button
-                      type="button"
-                      onClick={() => setMode('login')}
-                      className={`py-3 px-4 rounded-lg text-sm font-semibold transition-all ${
-                        mode === 'login'
-                          ? 'bg-primary text-primary-foreground shadow-md'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                      }`}
-                    >
-                      🔑 {t.auth?.login || 'Iniciar sesión'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setMode('signup')}
-                      className={`py-3 px-4 rounded-lg text-sm font-semibold transition-all ${
-                        mode === 'signup'
-                          ? 'bg-primary text-primary-foreground shadow-md'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                      }`}
-                    >
-                      ✨ {t.auth?.signup || 'Crear cuenta'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setMode('magic-link')}
-                      className={`py-3 px-4 rounded-lg text-sm font-semibold transition-all ${
-                        mode === 'magic-link'
-                          ? 'bg-primary text-primary-foreground shadow-md'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                      }`}
-                    >
-                      📧 {t.auth?.magicLink || 'Magic Link'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setMode('forgot-password')}
-                      className={`py-3 px-4 rounded-lg text-sm font-semibold transition-all ${
-                        mode === 'forgot-password'
-                          ? 'bg-primary text-primary-foreground shadow-md'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                      }`}
-                    >
-                      🔄 {t.auth?.forgotPassword || 'Recuperar'}
-                    </button>
-                  </div>
-
-                  {/* Email & Password Form */}
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                      <label htmlFor="email" className="block text-sm font-medium mb-2">
-                        {t.auth?.email || 'Email'}
-                      </label>
-                      <input
-                        id="email"
-                        type="email"
-                        placeholder={t.auth.emailPlaceholder}
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        disabled={isLoading}
-                        className="w-full px-4 py-2 rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                        required
-                      />
+              <div className="p-8">
+                {!magicLinkSent ? (
+                  <>
+                    {/* Mode Selector */}
+                    <div className="grid grid-cols-2 gap-3 mb-8">
+                      {authModes.map((authMode) => {
+                        const Icon = authMode.icon;
+                        const isActive = mode === authMode.key;
+                        
+                        return (
+                          <motion.button
+                            key={authMode.key}
+                            type="button"
+                            onClick={() => setMode(authMode.key)}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className={`p-4 rounded-2xl border-2 transition-all duration-200 ${
+                              isActive
+                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-600 dark:text-gray-400'
+                            }`}
+                          >
+                            <div className="flex flex-col items-center space-y-2">
+                              <Icon className={`h-5 w-5 ${isActive ? 'text-blue-600 dark:text-blue-400' : ''}`} />
+                              <span className="text-sm font-medium">{authMode.label}</span>
+                              <span className="text-xs opacity-70">{authMode.description}</span>
+                            </div>
+                          </motion.button>
+                        );
+                      })}
                     </div>
 
-                    {(mode === 'login' || mode === 'signup') && (
-                      <div>
-                        <label htmlFor="password" className="block text-sm font-medium mb-2">
-                          {t.auth?.password || 'Contraseña'}
+                    {/* Form */}
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                      <div className="space-y-2">
+                        <label htmlFor="email" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                          {t.auth?.email || 'Email'}
                         </label>
-                        <input
-                          id="password"
-                          type="password"
-                          placeholder="••••••••"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          disabled={isLoading}
-                          className="w-full px-4 py-2 rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                          required
-                        />
+                        <div className="relative">
+                          <input
+                            id="email"
+                            type="email"
+                            placeholder={t.auth.emailPlaceholder}
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            disabled={isLoading}
+                            className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all"
+                            required
+                          />
+                        </div>
                       </div>
-                    )}
 
-                    <Button
-                      type="submit"
-                      disabled={isLoading}
-                      className="w-full gap-2"
-                      size="lg"
-                    >
-                      {isLoading ? (
-                        <>
-                          <Loader2 className="h-5 w-5 animate-spin" />
-                          {t.auth?.sending || 'Enviando...'}
-                        </>
-                      ) : mode === 'magic-link' ? (
-                        <>
-                          <Mail className="h-5 w-5" />
-                          {t.auth?.sendMagicLink || 'Enviar Magic Link'}
-                        </>
-                      ) : mode === 'forgot-password' ? (
-                        <>
-                          🔄 {t.auth?.sendResetLink || 'Enviar enlace'}
-                        </>
-                      ) : mode === 'signup' ? (
-                        <>
-                          ✨ {t.auth?.createAccount || 'Crear cuenta'}
-                        </>
-                      ) : (
-                        <>
-                          🔓 {t.auth?.login || 'Iniciar sesión'}
-                        </>
+                      {(mode === 'login' || mode === 'signup') && (
+                        <div className="space-y-2">
+                          <label htmlFor="password" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                            {t.auth?.password || 'Contraseña'}
+                          </label>
+                          <div className="relative">
+                            <input
+                              id="password"
+                              type={showPassword ? "text" : "password"}
+                              placeholder="••••••••"
+                              value={password}
+                              onChange={(e) => setPassword(e.target.value)}
+                              disabled={isLoading}
+                              className="w-full px-4 py-3 pr-12 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all"
+                              required
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                            >
+                              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                            </button>
+                          </div>
+                        </div>
                       )}
-                    </Button>
-                  </form>
 
-                  <p className="text-xs text-muted-foreground mt-4 text-center">
-                    {mode === 'login' ? (
-                      <>
-                        ¿No tienes cuenta?{' '}
-                        <button
-                          type="button"
-                          onClick={() => setMode('signup')}
-                          className="text-primary hover:underline font-medium"
+                      <motion.div
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <Button
+                          type="submit"
+                          disabled={isLoading}
+                          className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold text-base shadow-lg hover:shadow-xl transition-all duration-200"
                         >
-                          Crear cuenta
-                        </button>
-                        {' • '}
-                        <button
-                          type="button"
-                          onClick={() => setMode('forgot-password')}
-                          className="text-primary hover:underline font-medium"
-                        >
-                          ¿Olvidaste tu contraseña?
-                        </button>
-                      </>
-                    ) : mode === 'signup' ? (
-                      <>
-                        ¿Ya tienes cuenta?{' '}
-                        <button
-                          type="button"
-                          onClick={() => setMode('login')}
-                          className="text-primary hover:underline font-medium"
-                        >
-                          Iniciar sesión
-                        </button>
-                      </>
-                    ) : mode === 'forgot-password' ? (
-                      <>
-                        ¿Recordaste tu contraseña?{' '}
-                        <button
-                          type="button"
-                          onClick={() => setMode('login')}
-                          className="text-primary hover:underline font-medium"
-                        >
-                          Iniciar sesión
-                        </button>
-                      </>
-                    ) : null}
-                  </p>
-                </>
-              ) : (
-                <div className="text-center py-6">
-                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                    <Mail className="h-8 w-8 text-primary" />
+                          {isLoading ? (
+                            <>
+                              <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                              {t.auth?.sending || 'Enviando...'}
+                            </>
+                          ) : mode === 'magic-link' ? (
+                            <>
+                              <Mail className="h-5 w-5 mr-2" />
+                              {t.auth?.sendMagicLink || 'Enviar Magic Link'}
+                            </>
+                          ) : mode === 'forgot-password' ? (
+                            <>
+                              <RotateCcw className="h-5 w-5 mr-2" />
+                              {t.auth?.sendResetLink || 'Enviar enlace'}
+                            </>
+                          ) : mode === 'signup' ? (
+                            <>
+                              <UserPlus className="h-5 w-5 mr-2" />
+                              {t.auth?.createAccount || 'Crear cuenta'}
+                            </>
+                          ) : (
+                            <>
+                              <Lock className="h-5 w-5 mr-2" />
+                              {t.auth?.login || 'Iniciar sesión'}
+                            </>
+                          )}
+                        </Button>
+                      </motion.div>
+                    </form>
+
+                    {/* Navigation Links */}
+                    <div className="mt-6 text-center">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {mode === 'login' ? (
+                          <>
+                            ¿No tienes cuenta?{' '}
+                            <button
+                              type="button"
+                              onClick={() => setMode('signup')}
+                              className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+                            >
+                              Crear cuenta
+                            </button>
+                            {' • '}
+                            <button
+                              type="button"
+                              onClick={() => setMode('forgot-password')}
+                              className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+                            >
+                              ¿Olvidaste tu contraseña?
+                            </button>
+                          </>
+                        ) : mode === 'signup' ? (
+                          <>
+                            ¿Ya tienes cuenta?{' '}
+                            <button
+                              type="button"
+                              onClick={() => setMode('login')}
+                              className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+                            >
+                              Iniciar sesión
+                            </button>
+                          </>
+                        ) : mode === 'forgot-password' ? (
+                          <>
+                            ¿Recordaste tu contraseña?{' '}
+                            <button
+                              type="button"
+                              onClick={() => setMode('login')}
+                              className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+                            >
+                              Iniciar sesión
+                            </button>
+                          </>
+                        ) : null}
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center py-8">
+                    <motion.div
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center mx-auto mb-6"
+                    >
+                      <Mail className="h-10 w-10 text-green-600 dark:text-green-400" />
+                    </motion.div>
+                    
+                    <motion.h3
+                      initial={{ y: 10, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ delay: 0.1 }}
+                      className="text-xl font-bold mb-3 text-gray-900 dark:text-white"
+                    >
+                      {t.auth?.checkEmail || 'Revisa tu email'}
+                    </motion.h3>
+                    
+                    <motion.p
+                      initial={{ y: 10, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ delay: 0.2 }}
+                      className="text-gray-600 dark:text-gray-400 mb-6"
+                    >
+                      Te hemos enviado un enlace a <strong className="text-gray-900 dark:text-white">{email}</strong>
+                    </motion.p>
+                    
+                    <motion.div
+                      initial={{ y: 10, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ delay: 0.3 }}
+                    >
+                      <Button 
+                        onClick={onClose} 
+                        variant="outline"
+                        className="px-8 py-2 rounded-xl border-2 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                      >
+                        {t.auth?.close || 'Cerrar'}
+                      </Button>
+                    </motion.div>
                   </div>
-                  <h3 className="text-xl font-bold mb-2">
-                    {t.auth?.checkEmail || 'Check your email'}
-                  </h3>
-                  <p className="text-muted-foreground mb-6">
-                    {t.auth?.checkEmail || 'Check your email'} <strong>{email}</strong>
-                  </p>
-                  <Button onClick={onClose} variant="outline">
-                    {t.auth?.close || 'Close'}
-                  </Button>
-                </div>
-              )}
+                )}
+              </div>
             </motion.div>
           </div>
         </div>
@@ -394,4 +481,3 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
     </AnimatePresence>
   );
 }
-
