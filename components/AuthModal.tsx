@@ -21,7 +21,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
-  const [mode, setMode] = useState<'login' | 'signup' | 'magic-link'>('login'); // Por defecto login
+  const [mode, setMode] = useState<'login' | 'signup' | 'magic-link' | 'forgot-password'>('login'); // Por defecto login
   const { toast } = useToast();
   const { t } = useLanguage();
 
@@ -73,6 +73,19 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
         toast({
           title: t.common.success,
           description: t.auth.checkEmail,
+        });
+      } else if (mode === 'forgot-password') {
+        // Recuperar contraseña
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        });
+
+        if (error) throw error;
+
+        setMagicLinkSent(true);
+        toast({
+          title: t.common?.success || 'Success',
+          description: t.auth?.passwordResetSent || 'Se ha enviado un enlace para restablecer tu contraseña',
         });
       } else if (mode === 'signup') {
         // Registro con Email + Password
@@ -179,11 +192,18 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
                 <>
                   <div className="text-center mb-6">
                     <h2 className="text-3xl font-bold mb-2">
-                      {mode === 'signup' ? (t.auth?.signupTitle || 'Crear cuenta') : (t.auth?.title || 'Iniciar sesión')}
+                      {mode === 'signup' 
+                        ? (t.auth?.signupTitle || 'Crear cuenta')
+                        : mode === 'forgot-password'
+                        ? (t.auth?.forgotPasswordTitle || 'Recuperar contraseña')
+                        : (t.auth?.title || 'Iniciar sesión')
+                      }
                     </h2>
                     <p className="text-muted-foreground">
                       {mode === 'signup' 
                         ? (t.auth?.signupSubtitle || 'Crea tu cuenta para guardar y exportar todos tus highlights')
+                        : mode === 'forgot-password'
+                        ? (t.auth?.forgotPasswordSubtitle || 'Te enviaremos un enlace para restablecer tu contraseña')
                         : (t.auth?.subtitle || 'Accede a tu cuenta para exportar todos tus highlights')
                       }
                     </p>
@@ -191,11 +211,11 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
 
 
                   {/* Mode Selector - Mejorado */}
-                  <div className="flex gap-2 p-1 bg-muted/50 rounded-xl mb-6">
+                  <div className="grid grid-cols-2 gap-2 p-1 bg-muted/50 rounded-xl mb-6">
                     <button
                       type="button"
                       onClick={() => setMode('login')}
-                      className={`flex-1 py-3 px-4 rounded-lg text-sm font-semibold transition-all ${
+                      className={`py-3 px-4 rounded-lg text-sm font-semibold transition-all ${
                         mode === 'login'
                           ? 'bg-primary text-primary-foreground shadow-md'
                           : 'text-muted-foreground hover:text-foreground hover:bg-muted'
@@ -206,7 +226,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
                     <button
                       type="button"
                       onClick={() => setMode('signup')}
-                      className={`flex-1 py-3 px-4 rounded-lg text-sm font-semibold transition-all ${
+                      className={`py-3 px-4 rounded-lg text-sm font-semibold transition-all ${
                         mode === 'signup'
                           ? 'bg-primary text-primary-foreground shadow-md'
                           : 'text-muted-foreground hover:text-foreground hover:bg-muted'
@@ -217,13 +237,24 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
                     <button
                       type="button"
                       onClick={() => setMode('magic-link')}
-                      className={`flex-1 py-3 px-4 rounded-lg text-sm font-semibold transition-all ${
+                      className={`py-3 px-4 rounded-lg text-sm font-semibold transition-all ${
                         mode === 'magic-link'
                           ? 'bg-primary text-primary-foreground shadow-md'
                           : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                       }`}
                     >
                       📧 {t.auth?.magicLink || 'Magic Link'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMode('forgot-password')}
+                      className={`py-3 px-4 rounded-lg text-sm font-semibold transition-all ${
+                        mode === 'forgot-password'
+                          ? 'bg-primary text-primary-foreground shadow-md'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                      }`}
+                    >
+                      🔄 {t.auth?.forgotPassword || 'Recuperar'}
                     </button>
                   </div>
 
@@ -279,6 +310,10 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
                           <Mail className="h-5 w-5" />
                           {t.auth?.sendMagicLink || 'Enviar Magic Link'}
                         </>
+                      ) : mode === 'forgot-password' ? (
+                        <>
+                          🔄 {t.auth?.sendResetLink || 'Enviar enlace'}
+                        </>
                       ) : mode === 'signup' ? (
                         <>
                           ✨ {t.auth?.createAccount || 'Crear cuenta'}
@@ -302,10 +337,29 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
                         >
                           Crear cuenta
                         </button>
+                        {' • '}
+                        <button
+                          type="button"
+                          onClick={() => setMode('forgot-password')}
+                          className="text-primary hover:underline font-medium"
+                        >
+                          ¿Olvidaste tu contraseña?
+                        </button>
                       </>
                     ) : mode === 'signup' ? (
                       <>
                         ¿Ya tienes cuenta?{' '}
+                        <button
+                          type="button"
+                          onClick={() => setMode('login')}
+                          className="text-primary hover:underline font-medium"
+                        >
+                          Iniciar sesión
+                        </button>
+                      </>
+                    ) : mode === 'forgot-password' ? (
+                      <>
+                        ¿Recordaste tu contraseña?{' '}
                         <button
                           type="button"
                           onClick={() => setMode('login')}

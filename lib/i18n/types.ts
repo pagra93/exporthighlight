@@ -24,20 +24,28 @@ export interface Translation {
   auth: {
     title: string;
     subtitle: string;
+    signupTitle: string;
+    signupSubtitle: string;
+    forgotPasswordTitle: string;
+    forgotPasswordSubtitle: string;
     email: string;
     password: string;
     magicLink: string;
     login: string;
+    signup: string;
+    forgotPassword: string;
+    createAccount: string;
+    sendResetLink: string;
     emailPlaceholder: string;
     passwordPlaceholder: string;
     checkEmail: string;
     sendMagicLink: string;
-    google: string;
-    orContinueWith: string;
     sending: string;
     close: string;
     passwordRequired: string;
     sessionStarted: string;
+    signupSuccess: string;
+    passwordResetSent: string;
   };
   
   // Account pages
