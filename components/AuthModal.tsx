@@ -156,33 +156,6 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
 
   if (!isOpen) return null;
 
-  const authModes = [
-    { 
-      key: 'login' as const, 
-      label: t.auth?.login || 'Iniciar sesión', 
-      icon: Lock,
-      description: 'Accede con tu cuenta'
-    },
-    { 
-      key: 'signup' as const, 
-      label: t.auth?.signup || 'Crear cuenta', 
-      icon: UserPlus,
-      description: 'Nueva cuenta'
-    },
-    { 
-      key: 'magic-link' as const, 
-      label: t.auth?.magicLink || 'Magic Link', 
-      icon: Mail,
-      description: 'Sin contraseña'
-    },
-    { 
-      key: 'forgot-password' as const, 
-      label: t.auth?.forgotPassword || 'Recuperar', 
-      icon: RotateCcw,
-      description: 'Restablecer'
-    }
-  ];
-
   return (
     <AnimatePresence>
       {isOpen && (
@@ -267,35 +240,6 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
               <div className="p-8">
                 {!magicLinkSent ? (
                   <>
-                    {/* Mode Selector */}
-                    <div className="grid grid-cols-2 gap-3 mb-8">
-                      {authModes.map((authMode) => {
-                        const Icon = authMode.icon;
-                        const isActive = mode === authMode.key;
-                        
-                        return (
-                          <motion.button
-                            key={authMode.key}
-                            type="button"
-                            onClick={() => setMode(authMode.key)}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            className={`p-4 rounded-2xl border-2 transition-all duration-200 ${
-                              isActive
-                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
-                                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-600 dark:text-gray-400'
-                            }`}
-                          >
-                            <div className="flex flex-col items-center space-y-2">
-                              <Icon className={`h-5 w-5 ${isActive ? 'text-blue-600 dark:text-blue-400' : ''}`} />
-                              <span className="text-sm font-medium">{authMode.label}</span>
-                              <span className="text-xs opacity-70">{authMode.description}</span>
-                            </div>
-                          </motion.button>
-                        );
-                      })}
-                    </div>
-
                     {/* Form */}
                     <form onSubmit={handleSubmit} className="space-y-6">
                       <div className="space-y-2">
@@ -319,7 +263,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
                       {(mode === 'login' || mode === 'signup') && (
                         <div className="space-y-2">
                           <label htmlFor="password" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                            {t.auth?.password || 'Contraseña'}
+                            {t.auth?.password || 'Password'}
                           </label>
                           <div className="relative">
                             <input
@@ -355,27 +299,27 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
                           {isLoading ? (
                             <>
                               <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                              {t.auth?.sending || 'Enviando...'}
+                              {t.auth?.sending || 'Sending...'}
                             </>
                           ) : mode === 'magic-link' ? (
                             <>
                               <Mail className="h-5 w-5 mr-2" />
-                              {t.auth?.sendMagicLink || 'Enviar Magic Link'}
+                              {t.auth?.sendMagicLink || 'Send Magic Link'}
                             </>
                           ) : mode === 'forgot-password' ? (
                             <>
                               <RotateCcw className="h-5 w-5 mr-2" />
-                              {t.auth?.sendResetLink || 'Enviar enlace'}
+                              {t.auth?.sendResetLink || 'Send Reset Link'}
                             </>
                           ) : mode === 'signup' ? (
                             <>
                               <UserPlus className="h-5 w-5 mr-2" />
-                              {t.auth?.createAccount || 'Crear cuenta'}
+                              {t.auth?.createAccount || 'Create Account'}
                             </>
                           ) : (
                             <>
                               <Lock className="h-5 w-5 mr-2" />
-                              {t.auth?.login || 'Iniciar sesión'}
+                              {t.auth?.login || 'Sign In'}
                             </>
                           )}
                         </Button>
@@ -383,51 +327,105 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
                     </form>
 
                     {/* Navigation Links */}
-                    <div className="mt-6 text-center">
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {mode === 'login' ? (
-                          <>
-                            ¿No tienes cuenta?{' '}
+                    <div className="mt-6 text-center space-y-2">
+                      {mode === 'login' ? (
+                        <>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            Don't have an account?{' '}
                             <button
                               type="button"
                               onClick={() => setMode('signup')}
                               className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
                             >
-                              Crear cuenta
+                              Create account
                             </button>
-                            {' • '}
+                          </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
                             <button
                               type="button"
                               onClick={() => setMode('forgot-password')}
                               className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
                             >
-                              ¿Olvidaste tu contraseña?
+                              Forgot your password?
                             </button>
-                          </>
-                        ) : mode === 'signup' ? (
-                          <>
-                            ¿Ya tienes cuenta?{' '}
+                          </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            <button
+                              type="button"
+                              onClick={() => setMode('magic-link')}
+                              className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+                            >
+                              Sign in with Magic Link
+                            </button>
+                          </p>
+                        </>
+                      ) : mode === 'signup' ? (
+                        <>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            Already have an account?{' '}
                             <button
                               type="button"
                               onClick={() => setMode('login')}
                               className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
                             >
-                              Iniciar sesión
+                              Sign in
                             </button>
-                          </>
-                        ) : mode === 'forgot-password' ? (
-                          <>
-                            ¿Recordaste tu contraseña?{' '}
+                          </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            <button
+                              type="button"
+                              onClick={() => setMode('magic-link')}
+                              className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+                            >
+                              Sign in with Magic Link
+                            </button>
+                          </p>
+                        </>
+                      ) : mode === 'forgot-password' ? (
+                        <>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            Remember your password?{' '}
                             <button
                               type="button"
                               onClick={() => setMode('login')}
                               className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
                             >
-                              Iniciar sesión
+                              Sign in
                             </button>
-                          </>
-                        ) : null}
-                      </p>
+                          </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            <button
+                              type="button"
+                              onClick={() => setMode('magic-link')}
+                              className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+                            >
+                              Sign in with Magic Link
+                            </button>
+                          </p>
+                        </>
+                      ) : mode === 'magic-link' ? (
+                        <>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            <button
+                              type="button"
+                              onClick={() => setMode('login')}
+                              className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+                            >
+                              Sign in with password
+                            </button>
+                          </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            Don't have an account?{' '}
+                            <button
+                              type="button"
+                              onClick={() => setMode('signup')}
+                              className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+                            >
+                              Create account
+                            </button>
+                          </p>
+                        </>
+                      ) : null}
                     </div>
                   </>
                 ) : (
