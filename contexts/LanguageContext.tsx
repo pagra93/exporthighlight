@@ -15,14 +15,19 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 const STORAGE_KEY = 'kindle-notes-language';
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>('en');
+  const [language, setLanguageState] = useState<Language>('es');
 
   // Initialize language from localStorage or browser
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      // Clear any existing language preference to force English
-      localStorage.removeItem(STORAGE_KEY);
-      setLanguageState('en');
+      const savedLanguage = localStorage.getItem(STORAGE_KEY) as Language;
+      const browserLanguage = navigator.language.split('-')[0] as Language;
+      
+      // Use saved language, browser language, or default to Spanish
+      const initialLanguage = savedLanguage || 
+        (browserLanguage && ['es', 'en', 'fr', 'de', 'it', 'pt'].includes(browserLanguage) ? browserLanguage : 'es');
+      
+      setLanguageState(initialLanguage);
     }
   }, []);
 
