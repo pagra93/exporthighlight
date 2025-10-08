@@ -19,13 +19,13 @@ El envío de emails de confirmación en Supabase puede fallar por varias razones
 
 #### ✅ Site URL
 ```
-Site URL: https://tu-dominio.com
+Site URL: https://exporthighlight.com
 ```
 
 #### ✅ Redirect URLs
 ```
 Redirect URLs: 
-- https://tu-dominio.com/auth/callback
+- https://exporthighlight.com/auth/callback
 - http://localhost:3000/auth/callback (para desarrollo)
 ```
 

@@ -16,9 +16,12 @@ Extract and organize your Kindle highlights from My Clippings.txt files into exp
 
 - **Frontend**: Next.js 14, React 18, TypeScript
 - **Styling**: TailwindCSS, shadcn/ui
-- **Backend**: Supabase (PostgreSQL, Auth, Storage)
+- **Backend**: Supabase (PostgreSQL, Row Level Security)
+- **Authentication**: NextAuth.js with Email Provider
 - **Animations**: Framer Motion
 - **Testing**: Vitest, Testing Library
+
+> **Note:** Currently migrating from Supabase Auth to NextAuth. See [`supabase/migrations/`](supabase/migrations/) for details.
 
 ## 📋 Prerequisites
 
@@ -52,9 +55,10 @@ Extract and organize your Kindle highlights from My Clippings.txt files into exp
    ```
 
 4. **Set up Supabase**
-   - Create a new Supabase project
+   - Create a new Supabase project (or use self-hosted with Coolify)
    - Run the SQL scripts in `supabase-schema.sql` and `supabase-tags-schema.sql`
    - Enable Row Level Security (RLS)
+   - **For authentication migration**: See [`supabase/migrations/INDEX.md`](supabase/migrations/INDEX.md)
 
 5. **Run the development server**
    ```bash
@@ -80,6 +84,8 @@ export-highlight/
 ├── lib/                   # Utility functions
 │   ├── i18n/             # Internationalization
 │   └── ...
+├── supabase/             # Supabase files
+│   └── migrations/       # Auth migration scripts (Supabase Auth → NextAuth)
 └── styles/               # Global styles
 ```
 
@@ -127,9 +133,17 @@ The app can be deployed to any platform that supports Next.js:
 |----------|-------------|----------|
 | `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL | Yes |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Your Supabase anonymous key | Yes |
-| `SUPABASE_SERVICE_ROLE_KEY` | Your Supabase service role key | Yes |
-| `NEXTAUTH_URL` | Your app URL | Yes |
-| `NEXTAUTH_SECRET` | Secret for NextAuth | Yes |
+| `SUPABASE_SERVICE_ROLE_KEY` | Your Supabase service role key (server-only) | Yes |
+| `SUPABASE_JWT_SECRET` | JWT secret for NextAuth (same as GOTRUE_JWT_SECRET) | Yes |
+| `NEXTAUTH_URL` | Your app URL (e.g., https://yourdomain.com) | Yes |
+| `NEXTAUTH_SECRET` | Secret for NextAuth (generate with openssl) | Yes |
+| `SMTP_HOST` | SMTP server host | Yes |
+| `SMTP_PORT` | SMTP server port | Yes |
+| `SMTP_USER` | SMTP username | Yes |
+| `SMTP_PASS` | SMTP password | Yes |
+| `SMTP_FROM` | Email "from" address | Yes |
+
+> **For self-hosted Supabase**: See [`supabase/migrations/SELF_HOSTED_GUIDE.md`](supabase/migrations/SELF_HOSTED_GUIDE.md) for detailed configuration.
 
 ## 🤝 Contributing
 
