@@ -8,7 +8,7 @@ import { LanguageProvider } from '@/contexts/LanguageContext';
 import { ExportSettingsProvider } from '@/contexts/ExportSettingsContext';
 import { ExportLimitProvider } from '@/contexts/ExportLimitContext';
 import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics';
-import { SessionProvider } from 'next-auth/react';
+import { Providers } from './providers';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -90,7 +90,7 @@ export default function RootLayout({
     <html lang="es">
       <body className={inter.className}>
         <GoogleAnalytics measurementId={process.env.NEXT_PUBLIC_GA_ID || 'G-8GH0CLP0BS'} />
-        <SessionProvider>
+        <Providers>
           <LanguageProvider>
             <ExportSettingsProvider>
               <ExportLimitProvider>
@@ -105,9 +105,8 @@ export default function RootLayout({
               </ExportLimitProvider>
             </ExportSettingsProvider>
           </LanguageProvider>
-        </SessionProvider>
+        </Providers>
       </body>
     </html>
   );
 }
-

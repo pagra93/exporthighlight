@@ -1,13 +1,12 @@
 import NextAuth from "next-auth";
-import Email from "next-auth/providers/email";
+import EmailProvider from "next-auth/providers/email";
 import jwt from "jsonwebtoken";
 import type { NextAuthConfig } from "next-auth";
-import { supabaseServer } from "@/lib/supabaseServer";
 
 export const authConfig = {
   session: { strategy: "jwt" },
   providers: [
-    Email({
+    EmailProvider({
       from: process.env.SMTP_FROM,
       maxAge: 10 * 60, // 10 minutos
       server: {
@@ -18,61 +17,13 @@ export const authConfig = {
           pass: process.env.SMTP_PASS!,
         },
       },
-      async sendVerificationRequest({ identifier: email, url }) {
-        // Crear o actualizar usuario en next_auth.users
-        const { data: existingUser } = await supabaseServer
-          .from('next_auth.users')
-          .select('id')
-          .eq('email', email)
-          .single();
-
-        if (!existingUser) {
-          await supabaseServer
-            .from('next_auth.users')
-            .insert({
-              email,
-              email_verified: null,
-            });
-        }
-
-        // Enviar email (NextAuth lo hace automáticamente con nodemailer)
-        const { createTransport } = await import('nodemailer');
-        const transport = createTransport({
-          host: process.env.SMTP_HOST!,
-          port: Number(process.env.SMTP_PORT!),
-          auth: {
-            user: process.env.SMTP_USER!,
-            pass: process.env.SMTP_PASS!,
-          },
-        });
-
-        await transport.sendMail({
-          to: email,
-          from: process.env.SMTP_FROM!,
-          subject: 'Inicia sesión en ExportHighlight',
-          text: `Haz click en el siguiente enlace para iniciar sesión:\n\n${url}\n\n`,
-          html: `<p>Haz click en el siguiente enlace para iniciar sesión:</p><p><a href="${url}">Iniciar sesión</a></p>`,
-        });
-      },
+      // ⚠️ Sin custom sendVerificationRequest por ahora - usar default de NextAuth
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: any) {
       if (user?.id) {
         token.sub = user.id as string;
-      }
-
-      // Si no tenemos sub pero tenemos email, buscar el usuario
-      if (!token.sub && token.email) {
-        const { data: userData } = await supabaseServer
-          .from('next_auth.users')
-          .select('id')
-          .eq('email', token.email)
-          .single();
-
-        if (userData) {
-          token.sub = userData.id;
-        }
       }
       
       // Firma JWT compatible con Supabase RLS
@@ -94,7 +45,7 @@ export const authConfig = {
       
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }: any) {
       if (session.user) {
         (session.user as any).id = token.sub;
       }
@@ -109,7 +60,6 @@ export const authConfig = {
   },
 } satisfies NextAuthConfig;
 
+// ⛔️ NO exportar GET/POST aquí
 export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);
-export const GET = handlers.GET;
-export const POST = handlers.POST;
 
