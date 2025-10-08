@@ -30,13 +30,7 @@ export default function ProfilePage() {
     }
   };
 
-  const joinedDate = user?.created_at 
-    ? new Date(user.created_at).toLocaleDateString('es-ES', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
-    : 'Fecha desconocida';
+  const joinedDate = 'Miembro desde 2025';
 
   return (
     <div className="p-8">
