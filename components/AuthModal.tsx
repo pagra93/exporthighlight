@@ -76,8 +76,11 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
           }
           
           // Si falla por email de confirmación, intentar login directo
-          if (error.message.includes('email') || error.message.includes('confirmation') || error.message.includes('mailer')) {
-            console.log('SMTP no configurado, intentando login directo...');
+          if (error.message.includes('email') || error.message.includes('confirmation') || error.message.includes('mailer') || error.message.includes('500')) {
+            console.log('Error de SMTP detectado, intentando login directo...');
+            
+            // Esperar un momento para que el usuario se cree
+            await new Promise(resolve => setTimeout(resolve, 1000));
             
             // Intentar login (por si el usuario se creó pero falló el email)
             const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
