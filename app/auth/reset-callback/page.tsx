@@ -1,10 +1,10 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Loader2, CheckCircle, XCircle, Lock } from 'lucide-react'
 
-export default function ResetCallback() {
+function ResetCallbackContent() {
   const [stage, setStage] = useState<'verifying'|'ready'|'done'|'error'>('verifying')
   const [err, setErr] = useState<string>('')
   const [password, setPassword] = useState('')
@@ -189,5 +189,23 @@ export default function ResetCallback() {
         </form>
       </div>
     </div>
+  )
+}
+
+export default function ResetCallback() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="max-w-md w-full mx-4 p-8 rounded-xl shadow-lg bg-blue-50">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Cargando...</h1>
+            <p className="text-gray-600">Preparando recuperación de contraseña</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <ResetCallbackContent />
+    </Suspense>
   )
 }
