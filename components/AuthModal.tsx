@@ -64,14 +64,37 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/account`,
+            // NO enviar email de confirmación
+            emailRedirectTo: undefined,
             data: {
               email_confirmed: true, // Marcar como confirmado
             }
           }
         });
 
-        if (error) throw error;
+        if (error) {
+          // Si falla por email, intentar login directo
+          if (error.message.includes('email') || error.message.includes('confirmation')) {
+            console.log('Intentando login directo después de registro...');
+            const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+              email,
+              password,
+            });
+            
+            if (loginError) throw loginError;
+            
+            toast({
+              title: "¡Registro exitoso!",
+              description: "Tu cuenta ha sido creada y has iniciado sesión.",
+            });
+            
+            router.push('/account');
+            onClose();
+            if (onSuccess) onSuccess();
+            return;
+          }
+          throw error;
+        }
 
         if (data.user) {
           toast({
