@@ -90,7 +90,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
           onClose();
         }
 
-      } else {
+      } else if (mode === 'login') {
         // Login normal
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
