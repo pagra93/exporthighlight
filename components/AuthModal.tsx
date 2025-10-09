@@ -59,30 +59,32 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
 
     try {
       if (mode === 'signup') {
-        // Registro: crear usuario sin confirmación de email
+        // REGISTRO: Intentar crear cuenta directamente
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            // NO enviar email de confirmación
-            emailRedirectTo: undefined,
-            data: {
-              email_confirmed: true, // Marcar como confirmado
-            }
+            emailRedirectTo: undefined, // Sin email de confirmación
           }
         });
 
         if (error) {
-          // Si falla por email, intentar login directo
-          if (error.message.includes('email') || error.message.includes('confirmation')) {
-            console.log('Intentando login directo después de registro...');
+          // Si falla por email de confirmación, intentar login directo
+          if (error.message.includes('email') || error.message.includes('confirmation') || error.message.includes('mailer')) {
+            console.log('Supabase intentó enviar email, haciendo login directo...');
+            
+            // Intentar login (por si el usuario se creó pero falló el email)
             const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
               email,
               password,
             });
             
-            if (loginError) throw loginError;
+            if (loginError) {
+              // Si login también falla, el usuario no se creó
+              throw new Error('No se pudo crear la cuenta. Intenta con otro email.');
+            }
             
+            // Si login funciona, el usuario se creó correctamente
             toast({
               title: "¡Registro exitoso!",
               description: "Tu cuenta ha sido creada y has iniciado sesión.",
@@ -93,29 +95,44 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
             if (onSuccess) onSuccess();
             return;
           }
+          
+          // Si falla por otra razón (usuario ya existe, etc.)
           throw error;
         }
 
+        // Si signUp funcionó correctamente
         if (data.user) {
-          toast({
-            title: "¡Registro exitoso!",
-            description: "Tu cuenta ha sido creada. Ya puedes iniciar sesión.",
-          });
-          
-          // Auto-login después del registro
-          const { error: signInError } = await supabase.auth.signInWithPassword({
+          // Intentar login inmediatamente después del registro
+          const { error: loginError } = await supabase.auth.signInWithPassword({
             email,
             password,
           });
 
-          if (signInError) throw signInError;
+          if (loginError) {
+            // Si login falla, mostrar mensaje pero el usuario se creó
+            toast({
+              title: "¡Registro exitoso!",
+              description: "Tu cuenta ha sido creada. Por favor inicia sesión.",
+            });
+            
+            // Cambiar a modo login
+            setMode('login');
+            return;
+          }
 
+          // Si login funciona, entrar directamente
+          toast({
+            title: "¡Registro exitoso!",
+            description: "Tu cuenta ha sido creada y has iniciado sesión.",
+          });
+          
           router.push('/account');
           onClose();
           if (onSuccess) onSuccess();
         }
+
       } else {
-        // Login: iniciar sesión
+        // Login normal
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -141,11 +158,19 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
       
       // Mensajes de error más amigables
       if (error.message.includes('Invalid login credentials')) {
-        errorMessage = 'Email o contraseña incorrectos';
+        errorMessage = mode === 'login' 
+          ? 'Email o contraseña incorrectos' 
+          : 'Este email ya está registrado. Inicia sesión.';
       } else if (error.message.includes('User already registered')) {
         errorMessage = 'Este email ya está registrado. Inicia sesión.';
       } else if (error.message.includes('Email not confirmed')) {
         errorMessage = 'Por favor confirma tu email antes de iniciar sesión';
+      } else if (error.message.includes('No se pudo crear la cuenta')) {
+        errorMessage = 'No se pudo crear la cuenta. Intenta con otro email.';
+      } else if (error.message.includes('email') || error.message.includes('mailer')) {
+        errorMessage = mode === 'signup' 
+          ? 'Error al crear la cuenta. Intenta de nuevo.' 
+          : 'Error de conexión. Intenta de nuevo.';
       }
       
       toast({
