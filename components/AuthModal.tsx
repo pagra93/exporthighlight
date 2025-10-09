@@ -29,7 +29,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [mode, setMode] = useState<'login' | 'signup'>('login');
+  const [mode, setMode] = useState<'login' | 'signup' | 'forgot-password'>('login');
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
   const { t } = useLanguage();
@@ -59,76 +59,34 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
 
     try {
       if (mode === 'signup') {
-        // REGISTRO: Intentar crear cuenta directamente
+        // REGISTRO: Usar flujo correcto con confirmación de email
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            emailRedirectTo: undefined, // Sin email de confirmación
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
           }
         });
 
         if (error) {
-          // Si falla por email de confirmación, intentar login directo
-          if (error.message.includes('email') || error.message.includes('confirmation') || error.message.includes('mailer')) {
-            console.log('Supabase intentó enviar email, haciendo login directo...');
-            
-            // Intentar login (por si el usuario se creó pero falló el email)
-            const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
-              email,
-              password,
-            });
-            
-            if (loginError) {
-              // Si login también falla, el usuario no se creó
-              throw new Error('No se pudo crear la cuenta. Intenta con otro email.');
-            }
-            
-            // Si login funciona, el usuario se creó correctamente
-            toast({
-              title: "¡Registro exitoso!",
-              description: "Tu cuenta ha sido creada y has iniciado sesión.",
-            });
-            
-            router.push('/account');
-            onClose();
-            if (onSuccess) onSuccess();
-            return;
+          // Si falla por usuario ya existente
+          if (error.message.includes('User already registered')) {
+            throw new Error('Este email ya está registrado. Inicia sesión.');
           }
           
-          // Si falla por otra razón (usuario ya existe, etc.)
+          // Si falla por otra razón
           throw error;
         }
 
         // Si signUp funcionó correctamente
         if (data.user) {
-          // Intentar login inmediatamente después del registro
-          const { error: loginError } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-          });
-
-          if (loginError) {
-            // Si login falla, mostrar mensaje pero el usuario se creó
-            toast({
-              title: "¡Registro exitoso!",
-              description: "Tu cuenta ha sido creada. Por favor inicia sesión.",
-            });
-            
-            // Cambiar a modo login
-            setMode('login');
-            return;
-          }
-
-          // Si login funciona, entrar directamente
           toast({
             title: "¡Registro exitoso!",
-            description: "Tu cuenta ha sido creada y has iniciado sesión.",
+            description: "Revisa tu email para confirmar tu cuenta.",
           });
           
-          router.push('/account');
+          // Cerrar modal y mostrar mensaje
           onClose();
-          if (onSuccess) onSuccess();
         }
 
       } else {
@@ -150,6 +108,19 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
           onClose();
           if (onSuccess) onSuccess();
         }
+      } else if (mode === 'forgot-password') {
+        // Olvidé mi contraseña: enviar enlace de reseteo
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/auth/reset-callback`,
+        });
+
+        if (error) throw error;
+
+        toast({
+          title: "¡Enlace enviado!",
+          description: "Revisa tu email para restablecer tu contraseña.",
+        });
+        onClose();
       }
     } catch (error: any) {
       console.error("Authentication error:", error);
@@ -185,12 +156,41 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
 
   if (!isOpen) return null;
 
-  const getTitle = () => mode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta';
-  const getSubtitle = () => mode === 'login' 
-    ? 'Ingresa con tu email y contraseña' 
-    : 'Crea tu cuenta para empezar';
-  const getButtonText = () => mode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta';
-  const Icon = mode === 'login' ? LogIn : UserPlus;
+  const getTitle = () => {
+    switch (mode) {
+      case 'login': return 'Iniciar Sesión';
+      case 'signup': return 'Crear Cuenta';
+      case 'forgot-password': return 'Recuperar Contraseña';
+      default: return 'Iniciar Sesión';
+    }
+  };
+
+  const getSubtitle = () => {
+    switch (mode) {
+      case 'login': return 'Ingresa con tu email y contraseña';
+      case 'signup': return 'Crea tu cuenta para empezar';
+      case 'forgot-password': return 'Te enviaremos un enlace para restablecer tu contraseña';
+      default: return 'Ingresa con tu email y contraseña';
+    }
+  };
+
+  const getButtonText = () => {
+    switch (mode) {
+      case 'login': return 'Iniciar Sesión';
+      case 'signup': return 'Crear Cuenta';
+      case 'forgot-password': return 'Enviar Enlace';
+      default: return 'Iniciar Sesión';
+    }
+  };
+
+  const Icon = (() => {
+    switch (mode) {
+      case 'login': return LogIn;
+      case 'signup': return UserPlus;
+      case 'forgot-password': return RotateCcw;
+      default: return LogIn;
+    }
+  })();
 
   return (
     <AnimatePresence>
@@ -243,34 +243,36 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
                   </div>
                 </div>
 
-                <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Contraseña
-                  </label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500" />
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      id="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder={mode === 'signup' ? 'Mínimo 6 caracteres' : '••••••••'}
-                      className="w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
-                      required
-                      disabled={isLoading}
-                      minLength={6}
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-gray-500 hover:bg-transparent hover:text-gray-700 dark:hover:text-gray-300"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </Button>
+                {(mode === 'login' || mode === 'signup') && (
+                  <div>
+                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Contraseña
+                    </label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500" />
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        id="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder={mode === 'signup' ? 'Mínimo 6 caracteres' : '••••••••'}
+                        className="w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+                        required
+                        disabled={isLoading}
+                        minLength={6}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-gray-500 hover:bg-transparent hover:text-gray-700 dark:hover:text-gray-300"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <Button
                   type="submit"
@@ -291,28 +293,55 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
                 </Button>
 
                 <div className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">
-                  {mode === 'login' ? (
-                    <p>
-                      ¿No tienes cuenta?{' '}
-                      <Button 
-                        variant="link" 
-                        type="button" 
-                        onClick={() => setMode('signup')} 
-                        className="p-0 h-auto text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
-                      >
-                        Crear cuenta
-                      </Button>
-                    </p>
-                  ) : (
+                  {mode === 'login' && (
+                    <>
+                      <p>
+                        ¿No tienes cuenta?{' '}
+                        <Button 
+                          variant="link" 
+                          type="button"
+                          onClick={() => setMode('signup')} 
+                          className="p-0 h-auto text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                        >
+                          Crear cuenta
+                        </Button>
+                      </p>
+                      <p className="mt-2">
+                        <Button 
+                          variant="link" 
+                          type="button"
+                          onClick={() => setMode('forgot-password')} 
+                          className="p-0 h-auto text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                        >
+                          ¿Olvidaste tu contraseña?
+                        </Button>
+                      </p>
+                    </>
+                  )}
+                  
+                  {mode === 'signup' && (
                     <p>
                       ¿Ya tienes cuenta?{' '}
                       <Button 
                         variant="link" 
-                        type="button" 
+                        type="button"
                         onClick={() => setMode('login')} 
                         className="p-0 h-auto text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
                       >
                         Iniciar sesión
+                      </Button>
+                    </p>
+                  )}
+                  
+                  {mode === 'forgot-password' && (
+                    <p>
+                      <Button 
+                        variant="link" 
+                        type="button"
+                        onClick={() => setMode('login')} 
+                        className="p-0 h-auto text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                      >
+                        ← Volver al inicio de sesión
                       </Button>
                     </p>
                   )}
