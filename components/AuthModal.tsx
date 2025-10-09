@@ -1,17 +1,20 @@
 "use client";
 
 import { useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { 
-  Mail, 
-  Loader2, 
-  X, 
-  UserPlus, 
-  KeyRound, 
-  RotateCcw
+import { supabase } from '@/lib/supabaseClient';
+import {
+  Mail,
+  Loader2,
+  X,
+  Lock,
+  UserPlus,
+  LogIn,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -22,20 +25,31 @@ interface AuthModalProps {
 }
 
 export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
+  const router = useRouter();
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [magicLinkSent, setMagicLinkSent] = useState(false);
-  const [mode, setMode] = useState<'login' | 'forgot-password'>('login');
+  const [mode, setMode] = useState<'login' | 'signup'>('login');
+  const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
   const { t } = useLanguage();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!email) {
+
+    if (!email || !password) {
       toast({
         title: t.common.error,
-        description: t.auth.emailPlaceholder,
+        description: "Por favor completa todos los campos",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (password.length < 6) {
+      toast({
+        title: t.common.error,
+        description: "La contraseña debe tener al menos 6 caracteres",
         variant: "destructive",
       });
       return;
@@ -44,31 +58,76 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
     setIsLoading(true);
 
     try {
-      // NextAuth siempre usa signIn con provider "email"
-      const result = await signIn('email', {
-        email,
-        redirect: false,
-        callbackUrl: '/account',
-      });
+      if (mode === 'signup') {
+        // Registro: crear usuario sin confirmación de email
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/account`,
+            data: {
+              email_confirmed: true, // Marcar como confirmado
+            }
+          }
+        });
 
-      if (result?.error) {
-        throw new Error(result.error);
-      }
+        if (error) throw error;
 
-      setMagicLinkSent(true);
-      toast({
-        title: t.common.success,
-        description: t.auth.checkEmail,
-      });
+        if (data.user) {
+          toast({
+            title: "¡Registro exitoso!",
+            description: "Tu cuenta ha sido creada. Ya puedes iniciar sesión.",
+          });
+          
+          // Auto-login después del registro
+          const { error: signInError } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
 
-      if (onSuccess) {
-        onSuccess();
+          if (signInError) throw signInError;
+
+          router.push('/account');
+          onClose();
+          if (onSuccess) onSuccess();
+        }
+      } else {
+        // Login: iniciar sesión
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (error) throw error;
+
+        if (data.user) {
+          toast({
+            title: "¡Bienvenido!",
+            description: "Has iniciado sesión correctamente.",
+          });
+          
+          router.push('/account');
+          onClose();
+          if (onSuccess) onSuccess();
+        }
       }
     } catch (error: any) {
-      console.error('Auth error:', error);
+      console.error("Authentication error:", error);
+      
+      let errorMessage = error.message;
+      
+      // Mensajes de error más amigables
+      if (error.message.includes('Invalid login credentials')) {
+        errorMessage = 'Email o contraseña incorrectos';
+      } else if (error.message.includes('User already registered')) {
+        errorMessage = 'Este email ya está registrado. Inicia sesión.';
+      } else if (error.message.includes('Email not confirmed')) {
+        errorMessage = 'Por favor confirma tu email antes de iniciar sesión';
+      }
+      
       toast({
         title: t.common.error,
-        description: error.message || t.common.error,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -76,118 +135,92 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
     }
   };
 
-  const getTitle = () => {
-    switch (mode) {
-      case 'forgot-password':
-        return t.auth?.forgotPasswordTitle || 'Recuperar contraseña';
-      default:
-        return t.auth.title;
-    }
-  };
-
-  const getSubtitle = () => {
-    switch (mode) {
-      case 'forgot-password':
-        return t.auth?.forgotPasswordSubtitle || 'Te enviaremos un enlace para restablecer tu contraseña';
-      default:
-        return t.auth.subtitle;
-    }
-  };
-
-  const getButtonText = () => {
-    if (mode === 'forgot-password') {
-      return t.auth?.sendResetLink || 'Enviar enlace';
-    }
-    return t.auth.sendMagicLink;
-  };
-
-  const getButtonIcon = () => {
-    if (mode === 'forgot-password') return KeyRound;
-    return Mail;
-  };
-
   if (!isOpen) return null;
 
-  const Icon = getButtonIcon();
+  const getTitle = () => mode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta';
+  const getSubtitle = () => mode === 'login' 
+    ? 'Ingresa con tu email y contraseña' 
+    : 'Crea tu cuenta para empezar';
+  const getButtonText = () => mode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta';
+  const Icon = mode === 'login' ? LogIn : UserPlus;
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      {isOpen && (
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          transition={{ duration: 0.2 }}
-          className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-2xl shadow-2xl overflow-hidden"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
         >
-          {/* Header con gradiente */}
-          <div className="relative bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 p-8 text-white">
-            <button
+          <motion.div
+            initial={{ scale: 0.9, y: 50 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0.9, y: 50 }}
+            className="relative w-full max-w-md mx-auto bg-white dark:bg-gray-950 rounded-xl shadow-2xl overflow-hidden"
+          >
+            <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-blue-500 to-indigo-600 dark:from-blue-700 dark:to-indigo-800"></div>
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={onClose}
-              className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/20 transition-colors"
-              aria-label="Close"
+              className="absolute top-4 right-4 z-10 text-white hover:bg-white/20 hover:text-white"
             >
-              <X className="w-5 h-5" />
-            </button>
-            
-            <motion.div
-              initial={{ y: -10, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.1 }}
-            >
-              <h2 className="text-2xl font-bold mb-2">{getTitle()}</h2>
-              <p className="text-blue-100 text-sm">{getSubtitle()}</p>
-            </motion.div>
-          </div>
+              <X className="h-5 w-5" />
+            </Button>
 
-          {/* Body */}
-          <div className="p-8">
-            {magicLinkSent ? (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-center space-y-4"
-              >
-                <div className="w-16 h-16 mx-auto bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-                  <Mail className="w-8 h-8 text-green-600 dark:text-green-400" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                    {t.auth.checkEmail}
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Hemos enviado un enlace mágico a <strong>{email}</strong>
-                  </p>
-                </div>
-                <Button
-                  onClick={onClose}
-                  variant="outline"
-                  className="w-full"
-                >
-                  Entendido
-                </Button>
-              </motion.div>
-            ) : (
+            <div className="relative z-10 p-8 pt-16 text-center">
+              <h2 className="text-3xl font-bold text-white mb-2">{getTitle()}</h2>
+              <p className="text-blue-100 dark:text-blue-200 text-opacity-80 mb-8">{getSubtitle()}</p>
+            </div>
+
+            <div className="p-8 bg-white dark:bg-gray-950 rounded-b-xl">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <label 
-                    htmlFor="email" 
-                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                  >
-                    {t.auth.email}
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Email
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500" />
                     <input
-                      id="email"
                       type="email"
+                      id="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder={t.auth.emailPlaceholder}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white transition-all"
-                      disabled={isLoading}
+                      placeholder="tu@email.com"
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
                       required
+                      disabled={isLoading}
                     />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Contraseña
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      id="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder={mode === 'signup' ? 'Mínimo 6 caracteres' : '••••••••'}
+                      className="w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+                      required
+                      disabled={isLoading}
+                      minLength={6}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-gray-500 hover:bg-transparent hover:text-gray-700 dark:hover:text-gray-300"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
                   </div>
                 </div>
 
@@ -199,7 +232,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
                   {isLoading ? (
                     <>
                       <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      Enviando...
+                      Procesando...
                     </>
                   ) : (
                     <>
@@ -209,50 +242,38 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
                   )}
                 </Button>
 
-                {/* Links de navegación */}
-                <div className="text-center space-y-2">
+                <div className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">
                   {mode === 'login' ? (
-                    <button
-                      type="button"
-                      onClick={() => setMode('forgot-password')}
-                      className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors flex items-center justify-center gap-1 mx-auto"
-                    >
-                      <KeyRound className="w-4 h-4" />
-                      {t.auth?.forgotPassword || '¿Olvidaste tu contraseña?'}
-                    </button>
+                    <p>
+                      ¿No tienes cuenta?{' '}
+                      <Button 
+                        variant="link" 
+                        type="button" 
+                        onClick={() => setMode('signup')} 
+                        className="p-0 h-auto text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                      >
+                        Crear cuenta
+                      </Button>
+                    </p>
                   ) : (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setMode('login');
-                        setMagicLinkSent(false);
-                      }}
-                      className="text-sm text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 font-medium transition-colors flex items-center justify-center gap-1 mx-auto"
-                    >
-                      <RotateCcw className="w-4 h-4" />
-                      Volver al inicio de sesión
-                    </button>
+                    <p>
+                      ¿Ya tienes cuenta?{' '}
+                      <Button 
+                        variant="link" 
+                        type="button" 
+                        onClick={() => setMode('login')} 
+                        className="p-0 h-auto text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                      >
+                        Iniciar sesión
+                      </Button>
+                    </p>
                   )}
                 </div>
               </form>
-            )}
-          </div>
-
-          {/* Footer */}
-          <div className="px-8 py-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700">
-            <p className="text-xs text-center text-gray-600 dark:text-gray-400">
-              Al continuar, aceptas nuestros{' '}
-              <a href="/terminos" className="text-blue-600 hover:underline dark:text-blue-400">
-                Términos de Servicio
-              </a>{' '}
-              y{' '}
-              <a href="/privacidad" className="text-blue-600 hover:underline dark:text-blue-400">
-                Política de Privacidad
-              </a>
-            </p>
-          </div>
+            </div>
+          </motion.div>
         </motion.div>
-      </div>
+      )}
     </AnimatePresence>
   );
 }

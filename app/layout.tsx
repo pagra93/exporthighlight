@@ -8,7 +8,6 @@ import { LanguageProvider } from '@/contexts/LanguageContext';
 import { ExportSettingsProvider } from '@/contexts/ExportSettingsContext';
 import { ExportLimitProvider } from '@/contexts/ExportLimitContext';
 import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics';
-import { Providers } from './providers';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -90,22 +89,20 @@ export default function RootLayout({
     <html lang="es">
       <body className={inter.className}>
         <GoogleAnalytics measurementId={process.env.NEXT_PUBLIC_GA_ID || 'G-8GH0CLP0BS'} />
-        <Providers>
-          <LanguageProvider>
-            <ExportSettingsProvider>
-              <ExportLimitProvider>
-                <div className="flex flex-col min-h-screen">
-                  <Nav />
-                  <main className="flex-1">
-                    {children}
-                  </main>
-                  <Footer />
-                </div>
-                <Toaster />
-              </ExportLimitProvider>
-            </ExportSettingsProvider>
-          </LanguageProvider>
-        </Providers>
+        <LanguageProvider>
+          <ExportSettingsProvider>
+            <ExportLimitProvider>
+              <div className="flex flex-col min-h-screen">
+                <Nav />
+                <main className="flex-1">
+                  {children}
+                </main>
+                <Footer />
+              </div>
+              <Toaster />
+            </ExportLimitProvider>
+          </ExportSettingsProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

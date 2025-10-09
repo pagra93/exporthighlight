@@ -9,33 +9,13 @@ export const isSupabaseConfigured = (): boolean => {
   return Boolean(supabaseUrl && supabaseAnonKey);
 };
 
-// Factory para crear cliente Supabase con token de NextAuth
-export function createSupabaseClient(accessToken?: string): SupabaseClient {
-  if (!isSupabaseConfigured()) {
-    throw new Error('Supabase not configured');
-  }
-
-  const client = createClient(supabaseUrl, supabaseAnonKey, {
-    global: {
-      headers: accessToken ? {
-        Authorization: `Bearer ${accessToken}`,
-      } : {},
-    },
-    auth: {
-      persistSession: false, // NextAuth maneja la sesión
-      autoRefreshToken: false,
-    },
-  });
-
-  // Configurar Realtime con el token
-  if (accessToken) {
-    client.realtime.setAuth(accessToken);
-  }
-
-  return client;
-}
-
-// Cliente por defecto (sin token - solo queries públicas)
+// Cliente de Supabase (singleton)
 export const supabase: SupabaseClient = isSupabaseConfigured()
-  ? createSupabaseClient()
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true, // Mantener sesión en localStorage
+        autoRefreshToken: true, // Auto-refresh del token
+        detectSessionInUrl: true, // Detectar sesión en URL (para callbacks)
+      },
+    })
   : {} as SupabaseClient;

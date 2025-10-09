@@ -1,27 +1,43 @@
 "use client";
 
-import { useSession, signOut as nextAuthSignOut } from 'next-auth/react';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabaseClient';
+import type { User, Session } from '@supabase/supabase-js';
 
 export function useAuth() {
-  const { data: session, status } = useSession();
-  
-  const user = session?.user ? {
-    id: (session.user as any).id,
-    email: session.user.email,
-    ...session.user,
-  } : null;
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Obtener sesión inicial
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    // Escuchar cambios de autenticación
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const signOut = async () => {
-    await nextAuthSignOut({ callbackUrl: '/' });
+    await supabase.auth.signOut();
   };
 
   return {
     user,
-    loading: status === 'loading',
+    session,
+    loading,
     isAuthenticated: !!user,
     signOut,
-    session,
   };
 }
-
-
