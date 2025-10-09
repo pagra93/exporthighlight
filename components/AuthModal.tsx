@@ -60,7 +60,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
 
     try {
       if (mode === 'signup') {
-        // REGISTRO: Usar flujo correcto con confirmación de email
+        // REGISTRO: Intentar con confirmación de email primero
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -75,19 +75,66 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
             throw new Error('Este email ya está registrado. Inicia sesión.');
           }
           
+          // Si falla por email de confirmación, intentar login directo
+          if (error.message.includes('email') || error.message.includes('confirmation') || error.message.includes('mailer')) {
+            console.log('SMTP no configurado, intentando login directo...');
+            
+            // Intentar login (por si el usuario se creó pero falló el email)
+            const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+              email,
+              password,
+            });
+            
+            if (loginError) {
+              // Si login también falla, el usuario no se creó
+              throw new Error('No se pudo crear la cuenta. Intenta con otro email.');
+            }
+            
+            // Si login funciona, el usuario se creó correctamente
+            toast({
+              title: "¡Registro exitoso!",
+              description: "Tu cuenta ha sido creada y has iniciado sesión.",
+            });
+            
+            router.push('/account');
+            onClose();
+            if (onSuccess) onSuccess();
+            return;
+          }
+          
           // Si falla por otra razón
           throw error;
         }
 
         // Si signUp funcionó correctamente
         if (data.user) {
+          // Intentar login inmediatamente después del registro
+          const { error: loginError } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+
+          if (loginError) {
+            // Si login falla, mostrar mensaje pero el usuario se creó
+            toast({
+              title: "¡Registro exitoso!",
+              description: "Tu cuenta ha sido creada. Por favor inicia sesión.",
+            });
+            
+            // Cambiar a modo login
+            setMode('login');
+            return;
+          }
+
+          // Si login funciona, entrar directamente
           toast({
             title: "¡Registro exitoso!",
-            description: "Revisa tu email para confirmar tu cuenta.",
+            description: "Tu cuenta ha sido creada y has iniciado sesión.",
           });
           
-          // Cerrar modal y mostrar mensaje
+          router.push('/account');
           onClose();
+          if (onSuccess) onSuccess();
         }
 
       } else if (mode === 'login') {
