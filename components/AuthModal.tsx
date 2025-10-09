@@ -14,7 +14,8 @@ import {
   UserPlus,
   LogIn,
   Eye,
-  EyeOff
+  EyeOff,
+  RotateCcw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
