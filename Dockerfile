@@ -1,4 +1,4 @@
-# Multi-stage build OPTIMIZADO para servidores con poca RAM
+# Multi-stage build ULTRA-OPTIMIZADO para 4GB RAM
 FROM node:20-alpine AS base
 
 # Install dependencies only when needed
@@ -9,9 +9,14 @@ WORKDIR /app
 # Copy package files
 COPY package.json package-lock.json ./
 
-# === OPTIMIZACIÓN: Instalar con menos concurrencia ===
-# Reduce el consumo de RAM durante npm ci
-RUN npm ci --prefer-offline --no-audit --progress=false
+# === OPTIMIZACIÓN EXTREMA: npm ci con restricciones máximas ===
+RUN npm ci \
+    --prefer-offline \
+    --no-audit \
+    --no-fund \
+    --loglevel=error \
+    --maxsockets=1 \
+    && npm cache clean --force
 
 # Rebuild the source code only when needed
 FROM base AS builder
@@ -29,13 +34,18 @@ ENV NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
 ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
 ENV SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
 
-# === OPTIMIZACIÓN: Configurar Next.js para usar menos RAM ===
+# === OPTIMIZACIÓN EXTREMA: Limitar RAM al máximo ===
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
-ENV NODE_OPTIONS="--max-old-space-size=3072"
+# Heap reducido a 2.5GB (dejar margen para el sistema)
+ENV NODE_OPTIONS="--max-old-space-size=2560 --max-semi-space-size=2 --max-old-generation-size=2048"
+# Desactivar source maps para ahorrar RAM
+ENV GENERATE_SOURCEMAP=false
 
-# Build con límite de memoria
-RUN npm run build
+# Build con límite de memoria estricto
+RUN npm run build && \
+    # Limpiar cache de Next.js para liberar espacio
+    rm -rf .next/cache
 
 # Production image, copy all the files and run next
 FROM base AS runner
