@@ -1,4 +1,4 @@
-# Multi-stage build OPTIMIZADO para servidores con poca RAM
+# Multi-stage build para reducir tamaño y recursos
 FROM node:20-alpine AS base
 
 # Install dependencies only when needed
@@ -8,10 +8,7 @@ WORKDIR /app
 
 # Copy package files
 COPY package.json package-lock.json ./
-
-# === OPTIMIZACIÓN: Instalar con menos concurrencia ===
-# Reduce el consumo de RAM durante npm ci
-RUN npm ci --prefer-offline --no-audit --progress=false
+RUN npm ci
 
 # Rebuild the source code only when needed
 FROM base AS builder
@@ -29,12 +26,9 @@ ENV NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
 ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
 ENV SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
 
-# === OPTIMIZACIÓN: Configurar Next.js para usar menos RAM ===
+# Build with optimizations
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
-ENV NODE_OPTIONS="--max-old-space-size=3072"
-
-# Build con límite de memoria
 RUN npm run build
 
 # Production image, copy all the files and run next
@@ -43,8 +37,6 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-# Límite de RAM para runtime (mucho menor que build)
-ENV NODE_OPTIONS="--max-old-space-size=512"
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -78,4 +70,3 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 CMD ["node", "server.js"]
-
