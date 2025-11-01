@@ -38,7 +38,7 @@ ENV SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 # Heap reducido a 2.5GB (dejar margen para el sistema)
-ENV NODE_OPTIONS="--max-old-space-size=2560 --max-semi-space-size=2 --max-old-generation-size=2048"
+ENV NODE_OPTIONS="--max-old-space-size=2560"
 # Desactivar source maps para ahorrar RAM
 ENV GENERATE_SOURCEMAP=false
 
