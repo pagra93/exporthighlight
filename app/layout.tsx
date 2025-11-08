@@ -12,19 +12,26 @@ import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Exporta Highlights de Kindle - Organiza tus notas y subrayados gratis',
-  description: 'Extrae y organiza todos tus highlights de Kindle, incluyendo libros de fuentes externas. Convierte My Clippings.txt en notas organizadas y exportables a Markdown. Gratis y sin límites.',
+  title: 'Export Kindle Notes & Highlights - Free Kindle Notes Organizer',
+  description: 'Export kindle notes and highlights from any book. Extract notes from My Clippings.txt including Amazon books, PDFs and EPUBs. Export to Markdown, Notion, Obsidian. Free tool.',
   keywords: [
-    'exportar highlights kindle',
-    'organizar notas kindle', 
-    'my clippings txt',
-    'extraer subrayados kindle',
+    // English keywords (primary target)
+    'export kindle notes',
+    'export highlight kindle',
+    'export notes books kindle',
+    'kindle notes export',
+    'kindle highlights export',
+    'export kindle highlights to markdown',
+    'my clippings txt export',
     'kindle notes organizer',
-    'exportar notas kindle a markdown',
-    'organizar biblioteca kindle',
-    'herramienta kindle highlights',
-    'kindle highlights gratis',
-    'notas kindle notion obsidian'
+    'export kindle notes to notion',
+    'export kindle notes to obsidian',
+    'kindle clippings export',
+    'extract kindle notes',
+    // Spanish keywords (secondary)
+    'exportar notas kindle',
+    'exportar highlights kindle',
+    'organizar notas kindle',
   ],
   authors: [{ name: 'Kindle Notes Organizer' }],
   creator: 'Kindle Notes Organizer',
@@ -43,25 +50,25 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: 'Exporta Highlights de Kindle - Organiza tus notas gratis',
-    description: 'Extrae todos tus highlights de Kindle, incluyendo libros de fuentes externas. Gratis y sin límites.',
+    title: 'Export Kindle Notes & Highlights - Free Kindle Notes Organizer',
+    description: 'Export kindle notes and highlights from any book. Extract notes from My Clippings.txt including Amazon books, PDFs and EPUBs. Export to Markdown, Notion, Obsidian.',
     url: '/',
-    siteName: 'Kindle Notes Organizer',
+    siteName: 'Export Highlight - Kindle Notes Organizer',
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Kindle Notes Organizer - Exporta tus highlights',
+        alt: 'Export Kindle Notes and Highlights - Free Tool',
       },
     ],
-    locale: 'es_ES',
+    locale: 'en_US',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Exporta Highlights de Kindle - Organiza tus notas gratis',
-    description: 'Extrae todos tus highlights de Kindle, incluyendo libros de fuentes externas.',
+    title: 'Export Kindle Notes & Highlights - Free Tool',
+    description: 'Export kindle notes and highlights from any book to Markdown, Notion, Obsidian. Free and unlimited.',
     images: ['/og-image.png'],
   },
   robots: {

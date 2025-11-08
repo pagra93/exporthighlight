@@ -285,9 +285,9 @@ export const en: Translation = {
 
   landing: {
     hero: {
-      title: 'Export Kindle Highlights',
-      subtitle: 'Extract all your Kindle notes, including books from external sources. Convert My Clippings.txt into organized and exportable highlights.',
-      cta: 'Extract My Highlights Now',
+      title: 'Export Kindle Notes & Highlights',
+      subtitle: 'Export kindle notes and highlights from any book - Amazon, PDFs, EPUBs. Extract and export notes from My Clippings.txt to Markdown, Notion, Obsidian. Free and unlimited.',
+      cta: 'Export My Kindle Notes Now',
       dragDrop: 'Drag your My Clippings.txt file here',
       uniqueValue: {
         title: 'Extract highlights from ANY Kindle book!',
@@ -301,8 +301,8 @@ export const en: Translation = {
       },
     },
     tutorial: {
-      title: 'How to Find Your My Clippings.txt File',
-      subtitle: 'Follow these 3 simple steps to locate and extract your Kindle highlights',
+      title: 'How to Export Kindle Notes: 3 Simple Steps',
+      subtitle: 'Follow these steps to export kindle notes and highlights from your device',
       steps: {
         step1: {
           title: 'Connect your Kindle',
@@ -319,15 +319,15 @@ export const en: Translation = {
       },
     },
     features: {
-      title: 'Unique Features of Our Tool',
+      title: 'Why Export Kindle Notes with Our Tool?',
       items: {
         organize: {
-          title: 'Extract ALL books',
-          description: 'Not just Amazon books. Works with PDFs, EPUBs, MOBIs and any file you\'ve read on your Kindle.',
+          title: 'Export Notes from ANY Kindle Book',
+          description: 'Export kindle notes from Amazon books, PDFs, EPUBs, MOBIs and any file you\'ve read on your Kindle. No limitations.',
         },
         export: {
-          title: 'Export to multiple formats',
-          description: 'Download your highlights in Markdown, PDF or ZIP. Compatible with Notion, Obsidian and more.',
+          title: 'Export Kindle Highlights to Markdown',
+          description: 'Export highlights to Markdown, PDF or ZIP. Export kindle notes to Notion, Obsidian, Roam Research and more.',
         },
         cloud: {
           title: 'Cloud synchronization',
@@ -340,23 +340,23 @@ export const en: Translation = {
       },
     },
     testimonials: {
-      title: 'What our users say',
-      subtitle: 'Thousands of users have already extracted their Kindle highlights with our tool',
+      title: 'Users Love Exporting Their Kindle Notes',
+      subtitle: 'Thousands of users export kindle notes and highlights daily with our free tool',
       items: {
         testimonial1: {
           name: 'Maria Gonzalez',
           role: 'Literature Student',
-          content: 'Amazing tool. I was able to extract all my highlights from books I downloaded from the internet. It was impossible to organize them before.',
+          content: 'Best tool to export kindle notes! I was able to export highlights from books I downloaded from the internet. Before it was impossible to organize them.',
         },
         testimonial2: {
           name: 'Carlos Ruiz',
           role: 'Researcher',
-          content: 'Finally I can export my notes from technical books that I didn\'t buy on Amazon. The tool works perfectly.',
+          content: 'Finally I can export kindle highlights from technical books that I didn\'t buy on Amazon. The tool works perfectly to export notes books kindle.',
         },
         testimonial3: {
           name: 'Ana Martin',
           role: 'Writer',
-          content: 'I\'ve tried many tools but this is the only one that works with ALL my Kindle books, no matter where I got them from.',
+          content: 'I\'ve tried many tools to export highlight kindle but this is the only one that works with ALL my Kindle books, no matter where I got them from.',
         },
       },
     },
@@ -366,33 +366,33 @@ export const en: Translation = {
       users: 'happy users',
     },
     faq: {
-      title: 'Frequently asked questions',
+      title: 'FAQ: How to Export Kindle Notes',
       items: {
         q1: {
-          question: 'Does it work with books NOT bought on Amazon?',
-          answer: 'Yes! This is our main advantage. It works with PDFs, EPUBs, MOBIs and any file you\'ve read on your Kindle, no matter where you got it from.',
+          question: 'How do I export kindle notes from any book?',
+          answer: 'Simply upload your My Clippings.txt file to export kindle notes. Our tool works with Amazon books, PDFs, EPUBs, MOBIs - any file you\'ve read on your Kindle.',
         },
         q2: {
-          question: 'Where do I find my My Clippings.txt file?',
-          answer: 'Connect your Kindle to your computer. The file is in the root folder: Kindle/documents/My Clippings.txt',
+          question: 'Where is my My Clippings.txt file to export highlights?',
+          answer: 'Connect your Kindle to your computer. The file to export kindle highlights is in: Kindle/documents/My Clippings.txt',
         },
         q3: {
-          question: 'Are my notes secure?',
-          answer: 'Yes. You can process the file locally without creating an account. If you save to the cloud, your data is encrypted and protected with RLS.',
+          question: 'Can I export kindle notes to Notion or Obsidian?',
+          answer: 'Yes! Export kindle highlights to Markdown (.md) format, compatible with Notion, Obsidian, Roam Research and other note-taking apps.',
         },
         q4: {
-          question: 'What export formats do you support?',
-          answer: 'Currently we export to Markdown (.md), compatible with Notion, Obsidian, Roam Research and other apps.',
+          question: 'Is it free to export notes books kindle?',
+          answer: 'Yes, completely free. Export notes books kindle without limits, no credit card required. Unlimited exports.',
         },
         q5: {
-          question: 'Does it support multiple languages?',
-          answer: 'Yes. We automatically detect the language of your highlights and process them correctly.',
+          question: 'Can I export highlight kindle from non-Amazon books?',
+          answer: 'Absolutely! Export highlight kindle from PDFs, EPUBs, MOBIs and any book format you\'ve read on your Kindle device.',
         },
       },
     },
     cta: {
-      title: 'Ready to extract your highlights?',
-      subtitle: 'Join thousands of users who already organize their Kindle notes with our tool',
+      title: 'Ready to Export Your Kindle Notes?',
+      subtitle: 'Join thousands of users who export kindle notes and highlights daily. Free, unlimited, no credit card required.',
     },
     footer: {
       madeWith: 'Made with ❤️ for readers',

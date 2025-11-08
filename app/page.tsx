@@ -108,14 +108,14 @@ export default function HomePage() {
     <div className="min-h-screen">
       {/* Schema Markup para SEO */}
       <WebApplicationSchema
-        name="Export Highlight"
-        description="Extrae y organiza todos tus highlights de Kindle, incluyendo libros de fuentes externas. Convierte My Clippings.txt en notas organizadas y exportables a Markdown."
+        name="Export Kindle Notes & Highlights"
+        description="Export kindle notes and highlights from any book. Extract and export notes from My Clippings.txt to Markdown, Notion, Obsidian. Works with Amazon books, PDFs, EPUBs. Free tool."
         url="https://exporthighlight.com"
         applicationCategory="ProductivityApplication"
         operatingSystem="Web Browser"
         offers={{
           price: "0",
-          priceCurrency: "EUR"
+          priceCurrency: "USD"
         }}
         aggregateRating={{
           ratingValue: 4.8,
@@ -126,24 +126,24 @@ export default function HomePage() {
       <FAQSchema
         faqs={[
           {
-            question: "¿Funciona con libros que NO compré en Amazon?",
-            answer: "¡Sí! Esta es nuestra ventaja principal. Funciona con PDFs, EPUBs, MOBIs y cualquier archivo que hayas leído en tu Kindle, sin importar de dónde lo conseguiste."
+            question: "How do I export kindle notes from any book?",
+            answer: "Simply upload your My Clippings.txt file to export kindle notes. Our tool works with Amazon books, PDFs, EPUBs, MOBIs - any file you've read on your Kindle."
           },
           {
-            question: "¿Dónde encuentro mi archivo My Clippings.txt?",
-            answer: "Conecta tu Kindle a tu computadora. El archivo está en la carpeta raíz: Kindle/documents/My Clippings.txt"
+            question: "Where is my My Clippings.txt file to export highlights?",
+            answer: "Connect your Kindle to your computer. The file to export kindle highlights is in: Kindle/documents/My Clippings.txt"
           },
           {
-            question: "¿Es gratis?",
-            answer: "Totalmente gratis. Sin límites, sin anuncios, sin tarjeta de crédito requerida."
+            question: "Can I export kindle notes to Notion or Obsidian?",
+            answer: "Yes! Export kindle highlights to Markdown (.md) format, compatible with Notion, Obsidian, Roam Research and other note-taking apps."
           },
           {
-            question: "¿Qué formatos de export soportan?",
-            answer: "Actualmente exportamos a Markdown (.md), compatible con Notion, Obsidian, Roam Research y otras apps."
+            question: "Is it free to export notes books kindle?",
+            answer: "Yes, completely free. Export notes books kindle without limits, no credit card required. Unlimited exports."
           },
           {
-            question: "¿Soporta múltiples idiomas?",
-            answer: "Sí. Detectamos automáticamente el idioma de tus highlights y los procesamos correctamente."
+            question: "Can I export highlight kindle from non-Amazon books?",
+            answer: "Absolutely! Export highlight kindle from PDFs, EPUBs, MOBIs and any book format you've read on your Kindle device."
           }
         ]}
       />
