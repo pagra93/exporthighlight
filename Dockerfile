@@ -34,12 +34,12 @@ ENV NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
 ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
 ENV SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
 
-# === OPTIMIZACIÓN ULTRA-AGRESIVA: Limitar RAM y CPU ===
+# === OPTIMIZACIÓN EXTREMA: Limitar RAM a 2GB (muy conservador) ===
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
-# Heap de 2.5GB para 4GB de RAM (LENTO pero ESTABLE, no crashea)
-ENV NODE_OPTIONS="--max-old-space-size=2560 --max-semi-space-size=2"
-# CRÍTICO: Forzar UN SOLO THREAD en Node.js para evitar CPU al 300%
+# Heap de 2GB para 4GB de RAM (EXTREMADAMENTE LENTO pero máxima estabilidad)
+ENV NODE_OPTIONS="--max-old-space-size=2048 --max-semi-space-size=2"
+# Forzar UN SOLO THREAD en Node.js
 ENV UV_THREADPOOL_SIZE=1
 # Desactivar source maps para ahorrar RAM
 ENV GENERATE_SOURCEMAP=false
