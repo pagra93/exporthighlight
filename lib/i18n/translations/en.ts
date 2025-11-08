@@ -285,20 +285,12 @@ export const en: Translation = {
 
   landing: {
     hero: {
+      badge: '⚡ Works with ALL book sources',
       title: 'Export Kindle Notes & Highlights',
-      subtitle: 'Export kindle notes and highlights from any book - Amazon, PDFs, EPUBs. Extract and export notes from My Clippings.txt to Markdown, Notion, Obsidian. Free and unlimited.',
+      subtitle: 'Export highlights from any book on your Kindle. Amazon books, PDFs, EPUBs - everything. No restrictions.',
       cta: 'Export My Kindle Notes Now',
       dragDrop: 'Drag your My Clippings.txt file here',
-      uniqueValue: {
-        title: 'Extract highlights from ANY Kindle book!',
-        description: 'Amazon books, PDFs, EPUBs, MOBIs, books downloaded from the internet...',
-        subtitle: 'No matter where the book comes from. If you read it on your Kindle, we can extract your highlights',
-        badge: '⚡ UNIQUE ADVANTAGE',
-        comparison: {
-          onlyAmazon: 'Only Amazon',
-          allBooks: 'ALL books',
-        },
-      },
+      dashboardPreview: 'See your highlights organized and ready to export',
     },
     tutorial: {
       title: 'How to Export Kindle Notes: 3 Simple Steps',

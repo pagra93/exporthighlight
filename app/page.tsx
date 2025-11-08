@@ -148,117 +148,147 @@ export default function HomePage() {
         ]}
       />
 
-      {/* Hero Section - Optimizado para SEO */}
+      {/* Hero Section - Optimizado para SEO con Dashboard Preview */}
       <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] dark:bg-grid-slate-700/25 dark:[mask-image:linear-gradient(0deg,rgba(255,255,255,0.1),rgba(255,255,255,0.5))]" />
         
         <div className="relative container mx-auto px-4 py-20 md:py-32">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center max-w-4xl mx-auto mb-16"
-          >
-            {/* H1 Optimizado para SEO - Palabras clave principales */}
-            <h1 className="text-5xl md:text-7xl font-extrabold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-              {t.landing.hero.title}
-            </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              {t.landing.hero.subtitle}
-            </p>
+          <div className="grid lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
             
-            {/* Upload Area */}
+            {/* Left Column: Text + Upload */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="max-w-2xl mx-auto mb-8"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              className="space-y-8"
             >
-              <AnimatePresence mode="wait">
-                {progress.isProcessing ? (
-                  <motion.div
-                    key="progress"
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <ParsingProgress progress={progress} />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="upload"
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.3 }}
-                    className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 backdrop-blur-sm border border-gray-200 dark:border-gray-700"
-                  >
-                    <SimpleDropzone
-                      onFileAccepted={handleFileAccepted}
-                      disabled={progress.isProcessing}
-                      selectedFileName={file?.name}
-                    />
-                    
-                    {file && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="mt-6"
-                      >
-                        <Button
-                          onClick={handleProcess}
-                          disabled={progress.isProcessing}
-                          size="lg"
-                          className="w-full text-lg h-14 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              {/* Badge */}
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="inline-block"
+              >
+                <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
+                  {t.landing.hero.badge}
+                </div>
+              </motion.div>
+
+              {/* H1 Optimizado para SEO */}
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent leading-tight">
+                {t.landing.hero.title}
+              </h1>
+              
+              <p className="text-xl md:text-2xl text-muted-foreground">
+                {t.landing.hero.subtitle}
+              </p>
+              
+              {/* Upload Area */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
+                <AnimatePresence mode="wait">
+                  {progress.isProcessing ? (
+                    <motion.div
+                      key="progress"
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <ParsingProgress progress={progress} />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="upload"
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.3 }}
+                      className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 backdrop-blur-sm border border-gray-200 dark:border-gray-700"
+                    >
+                      <SimpleDropzone
+                        onFileAccepted={handleFileAccepted}
+                        disabled={progress.isProcessing}
+                        selectedFileName={file?.name}
+                      />
+                      
+                      {file && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="mt-6"
                         >
-                          <Zap className="h-5 w-5 mr-2" />
-                          {t.landing.hero.cta}
-                          <ArrowRight className="h-5 w-5 ml-2" />
-                        </Button>
-                      </motion.div>
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                          <Button
+                            onClick={handleProcess}
+                            disabled={progress.isProcessing}
+                            size="lg"
+                            className="w-full text-lg h-14 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                          >
+                            <Zap className="h-5 w-5 mr-2" />
+                            {t.landing.hero.cta}
+                            <ArrowRight className="h-5 w-5 ml-2" />
+                          </Button>
+                        </motion.div>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
             </motion.div>
 
-            {/* Valor único destacado - Diseño creativo */}
-            <div className="relative max-w-4xl mx-auto mt-12">
-              <div className="bg-gradient-to-r from-orange-50 via-red-50 to-pink-50 dark:from-orange-900/20 dark:via-red-900/20 dark:to-pink-900/20 border-2 border-orange-200 dark:border-orange-800 rounded-2xl p-8 shadow-lg">
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg">
-                    {t.landing.hero.uniqueValue.badge}
-                  </div>
+            {/* Right Column: Dashboard Preview Image */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="relative hidden lg:block"
+            >
+              <div className="relative">
+                {/* Decorative background blur */}
+                <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-3xl blur-3xl" />
+                
+                {/* Dashboard Screenshot */}
+                <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                  <img 
+                    src="/dashboard-preview.png" 
+                    alt="Export Kindle Notes Dashboard - Organize and export your highlights"
+                    className="w-full h-auto"
+                  />
                 </div>
-                <div className="flex items-center justify-center gap-4 mb-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">NO</span>
-                    </div>
-                    <span className="text-lg font-semibold text-gray-600 dark:text-gray-300">{t.landing.hero.uniqueValue.comparison.onlyAmazon}</span>
-                  </div>
-                  <ArrowRight className="h-6 w-6 text-orange-500" />
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
-                      <CheckCircle className="h-5 w-5 text-white" />
-                    </div>
-                    <span className="text-lg font-semibold text-green-700 dark:text-green-300">{t.landing.hero.uniqueValue.comparison.allBooks}</span>
-                  </div>
-                </div>
-                <h2 className="text-2xl font-bold text-center mb-3 text-orange-800 dark:text-orange-200">
-                  {t.landing.hero.uniqueValue.title}
-                </h2>
-                <p className="text-lg text-center text-orange-700 dark:text-orange-300 mb-4">
-                  <strong>{t.landing.hero.uniqueValue.description}</strong>
-                </p>
-                <p className="text-base text-center text-orange-600 dark:text-orange-400">
-                  {t.landing.hero.uniqueValue.subtitle}
+                
+                {/* Caption below image */}
+                <p className="mt-6 text-center text-sm text-muted-foreground">
+                  {t.landing.hero.dashboardPreview}
                 </p>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
 
+            {/* Mobile: Dashboard Preview Below Upload */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="lg:hidden mt-8"
+            >
+              <div className="relative">
+                <div className="absolute -inset-2 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-2xl blur-2xl" />
+                <div className="relative rounded-xl overflow-hidden shadow-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                  <img 
+                    src="/dashboard-preview.png" 
+                    alt="Export Kindle Notes Dashboard"
+                    className="w-full h-auto"
+                  />
+                </div>
+                <p className="mt-4 text-center text-sm text-muted-foreground">
+                  {t.landing.hero.dashboardPreview}
+                </p>
+              </div>
+            </motion.div>
+
+          </div>
         </div>
       </section>
 

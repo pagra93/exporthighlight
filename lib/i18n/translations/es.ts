@@ -285,20 +285,12 @@ export const es: Translation = {
 
   landing: {
     hero: {
-      title: 'Exporta Highlights de Kindle',
-      subtitle: 'Extrae todas tus notas de Kindle, incluyendo libros de fuentes externas. Convierte My Clippings.txt en highlights organizados y exportables.',
-      cta: 'Extraer Mis Highlights Ahora',
+      badge: '⚡ Funciona con TODAS las fuentes',
+      title: 'Exporta Destacados de Kindle',
+      subtitle: 'Exporta subrayados de cualquier libro en tu Kindle. Libros de Amazon, PDFs, EPUBs - todo. Sin restricciones.',
+      cta: 'Exportar Mis Destacados Ahora',
       dragDrop: 'Arrastra tu archivo My Clippings.txt aquí',
-      uniqueValue: {
-        title: '¡Extrae highlights de CUALQUIER libro Kindle!',
-        description: 'Libros de Amazon, PDFs, EPUBs, MOBIs, libros descargados de internet...',
-        subtitle: 'No importa de dónde venga el libro. Si lo leíste en tu Kindle, podemos extraer tus highlights',
-        badge: '⚡ VENTAJA ÚNICA',
-        comparison: {
-          onlyAmazon: 'Solo Amazon',
-          allBooks: 'TODOS los libros',
-        },
-      },
+      dashboardPreview: 'Mira tus subrayados organizados y listos para exportar',
     },
     tutorial: {
       title: 'Cómo Encontrar tu Archivo My Clippings.txt',
