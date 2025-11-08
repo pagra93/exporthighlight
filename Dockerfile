@@ -9,13 +9,12 @@ WORKDIR /app
 # Copy package files
 COPY package.json package-lock.json ./
 
-# === OPTIMIZACIÓN EXTREMA: npm ci con restricciones máximas ===
+# === OPTIMIZACIÓN: npm ci con menos overhead ===
 RUN npm ci \
     --prefer-offline \
     --no-audit \
     --no-fund \
     --loglevel=error \
-    --maxsockets=1 \
     && npm cache clean --force
 
 # Rebuild the source code only when needed
@@ -34,11 +33,11 @@ ENV NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
 ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
 ENV SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
 
-# === OPTIMIZACIÓN EXTREMA: Limitar RAM al máximo ===
+# === OPTIMIZACIÓN: Limitar RAM razonablemente ===
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
-# Heap reducido a 2.5GB (dejar margen para el sistema)
-ENV NODE_OPTIONS="--max-old-space-size=2560"
+# Heap de 3.5GB para 4GB de RAM (balance velocidad/memoria)
+ENV NODE_OPTIONS="--max-old-space-size=3584"
 # Desactivar source maps para ahorrar RAM
 ENV GENERATE_SOURCEMAP=false
 
