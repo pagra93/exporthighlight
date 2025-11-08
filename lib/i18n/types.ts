@@ -294,20 +294,12 @@ export interface Translation {
   // Landing page
   landing: {
     hero: {
+      badge: string;
       title: string;
       subtitle: string;
       cta: string;
       dragDrop: string;
-      uniqueValue: {
-        title: string;
-        description: string;
-        subtitle: string;
-        badge: string;
-        comparison: {
-          onlyAmazon: string;
-          allBooks: string;
-        };
-      };
+      dashboardPreview: string;
     };
     tutorial: {
       title: string;
